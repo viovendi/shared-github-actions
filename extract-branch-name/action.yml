@@ -1,0 +1,17 @@
+name: Extract branch name
+description: Extract branch name from the ref (e.g. main from refs/heads/main)
+inputs:
+  github-ref:
+    description: GitHub ref (e.g. refs/heads/main)
+    required: true
+outputs:
+  branch-name:
+    description: Branch name (e.g. main)
+    value: ${{ steps.extract-branch-name.outputs.branch-name }}
+runs:
+  using: composite
+  steps:
+    - name: Extract branch name
+      id: extract-branch-name
+      shell: bash
+      run: echo "##[set-output name=branch-name;]$(echo ${GITHUB_REF#refs/heads/})"

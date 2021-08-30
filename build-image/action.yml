@@ -34,7 +34,7 @@ runs:
 
     - name: Extract branch name
       id: extract-branch-name
-      uses: ./shared-github-actions/extract-branch-name
+      uses: viovendi/shared-github-actions/extract-branch-name@master
       with:
         github-ref: ${{ inputs.github-ref }}
 

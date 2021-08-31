@@ -31,10 +31,6 @@ runs:
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: ${{ inputs.aws-region }}
 
-    - name: Get active branch name
-      id: get-active-branch-name
-      uses: viovendi/shared-github-actions/get-active-branch-name@master
-
     - name: Check if the image exists
       shell: bash
       run: |

@@ -30,8 +30,8 @@ runs:
       uses: aws-actions/amazon-ecr-login@v1
 
     - name: Get active branch name
-      id: get-active-branch-name
-      uses: viovendi/shared-github-actions/get-active-branch-name@master
+      id: get-current-branch-name
+      uses: viovendi/shared-github-actions/get-current-branch-name@master
 
     - name: Build image
       shell: bash
@@ -39,7 +39,7 @@ runs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ inputs.ecr-repository }}
         GITHUB_COMMIT_HASH: ${{ github.sha }}
-        GITHUB_BRANCH_NAME: ${{ steps.get-active-branch-name.outputs.branch-name }}
+        GITHUB_BRANCH_NAME: ${{ steps.get-current-branch-name.outputs.branch-name }}
       run: |
         docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_BRANCH_NAME || true
         docker build \

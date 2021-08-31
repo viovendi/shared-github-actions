@@ -3,11 +3,21 @@ description: Get active branch name for any type of the trigger (workflow_dispat
 outputs:
   branch-name:
     description: Branch name
-    value: ${{ steps.extract-branch-name.outputs.branch-name }}
+    value: ${{ steps.get-branch-name.outputs.branch-name }}
 runs:
   using: composite
   steps:
-    - name: Extract branch name
-      id: extract-branch-name
+    - name: Get the branch name for the pull_request trigger
+      if: github.event_name == 'pull_request'
       shell: bash
-      run: echo "##[set-output name=branch-name;]$(echo ${GITHUB_REF#refs/heads/})"
+      run: echo "BRANCH_NAME=${GITHUB_HEAD_REF#refs/heads/}" >> $GITHUB_ENV
+
+    - name: Get the branch name for the other triggers
+      if: github.event_name != 'pull_request'
+      shell: bash
+      run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+    - name: Set the branch name to output
+      id: get-branch-name
+      shell: bash
+      run: echo "##[set-output name=branch-name;]$(echo $GITHUB_REF)"

@@ -1,12 +1,8 @@
-name: Extract branch name
-description: Extract branch name from the ref (e.g. main from refs/heads/main)
-inputs:
-  github-ref:
-    description: GitHub ref (e.g. refs/heads/main)
-    required: true
+name:  Get active branch name
+description: Get active branch name for any type of the trigger (workflow_dispatch, pull_request, etc.)
 outputs:
   branch-name:
-    description: Branch name (e.g. main)
+    description: Branch name
     value: ${{ steps.extract-branch-name.outputs.branch-name }}
 runs:
   using: composite

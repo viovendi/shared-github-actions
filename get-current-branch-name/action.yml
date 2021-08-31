@@ -25,7 +25,7 @@ runs:
 
     - name: Print branch name
       shell: bash
-      run: echo "Current branch name: $BRANCH_NAME"
+      run: echo "Current branch name - $BRANCH_NAME"
 
     - name: Set branch name to output
       id: get-branch-name

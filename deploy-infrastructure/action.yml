@@ -1,0 +1,59 @@
+name: Deploy infrastructure
+inputs:
+  microservice-name:
+    description: Microservice short name
+    required: true
+  environment:
+    description: Environment
+    required: true
+  ecr-repository:
+    description: ECR repository
+    required: true
+  aws-access-key-id:
+    description: AWS access key id
+    required: true
+  aws-secret-access-key:
+    description: AWS secret access key
+    required: true
+  aws-region:
+    description: AWS region
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+
+    - name: Get active branch name
+      id: get-active-branch-name
+      uses: viovendi/shared-github-actions/get-active-branch-name@master
+
+    - name: Check if the image exists
+      shell: bash
+      run: |
+        aws ecr describe-images \
+          --repository-name ${{ inputs.ecr-repository }} \
+          --image-ids imageTag=${{ github.sha }}
+
+    - name: Package infrastructure
+      run: |
+        aws cloudformation package \
+          --template-file ./infrastructure/infrastructure.yml \
+          --s3-bucket doo-infrastructure \
+          --s3-prefix ${{ inputs.microservice-name }} \
+          --output-template-file ./infrastructure/compiled-infrastructure.yml
+
+    - name: Deploy infrastructure
+      run: |
+        aws cloudformation deploy \
+          --template-file ./infrastructure/compiled-infrastructure.yml \
+          --stack-name ${{ format('{0}-{1}', inputs.microservice-name, inputs.environment) }} \
+          --parameter-overrides Infrastructure=${{ inputs.environment }} ImageTag=${{ github.sha }} \
+          --capabilities CAPABILITY_IAM

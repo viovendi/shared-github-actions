@@ -17,7 +17,6 @@ runs:
 
     - name: Get the branch name for the other triggers
       shell: bash
-      run: 
       run: |
         if [[ "${{ github.event_name }}" != "pull_request" ]]; then
           echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV

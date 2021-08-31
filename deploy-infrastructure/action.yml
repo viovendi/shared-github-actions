@@ -43,6 +43,7 @@ runs:
           --image-ids imageTag=${{ github.sha }}
 
     - name: Package infrastructure
+      shell: bash
       run: |
         aws cloudformation package \
           --template-file ./infrastructure/infrastructure.yml \
@@ -51,6 +52,7 @@ runs:
           --output-template-file ./infrastructure/compiled-infrastructure.yml
 
     - name: Deploy infrastructure
+      shell: bash
       run: |
         aws cloudformation deploy \
           --template-file ./infrastructure/compiled-infrastructure.yml \

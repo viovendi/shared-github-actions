@@ -31,12 +31,16 @@ runs:
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: ${{ inputs.aws-region }}
 
+    - name: Get current commit hash
+      id: get-current-commit-hash
+      uses: viovendi/shared-github-actions/get-current-commit-hash@master
+
     - name: Check if the image exists
       shell: bash
       run: |
         aws ecr describe-images \
           --repository-name ${{ inputs.ecr-repository }} \
-          --image-ids imageTag=${{ github.sha }}
+          --image-ids imageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }}
 
     - name: Package infrastructure
       shell: bash
@@ -53,5 +57,5 @@ runs:
         aws cloudformation deploy \
           --template-file ./infrastructure/compiled-infrastructure.yml \
           --stack-name ${{ format('{0}-{1}', inputs.microservice-name, inputs.environment) }} \
-          --parameter-overrides Infrastructure=${{ inputs.environment }} ImageTag=${{ github.sha }} \
+          --parameter-overrides Infrastructure=${{ inputs.environment }} ImageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }} \
           --capabilities CAPABILITY_IAM

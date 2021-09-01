@@ -57,5 +57,7 @@ runs:
         aws cloudformation deploy \
           --template-file ./infrastructure/compiled-infrastructure.yml \
           --stack-name ${{ format('{0}-{1}', inputs.microservice-name, inputs.environment) }} \
+          --s3-bucket doo-infrastructure \
+          --s3-prefix ${{ inputs.microservice-name }} \
           --parameter-overrides Infrastructure=${{ inputs.environment }} ImageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }} \
           --capabilities CAPABILITY_IAM

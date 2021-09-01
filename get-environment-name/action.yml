@@ -17,7 +17,10 @@ runs:
           // if more than one environment label is attached to the PR, throw an exception
           var envLabelCount = 0;
           for (const label of result.data.labels) {
-            envLabelCount++;
+            if (label.name.startsWith('cicd:deploy:')) {
+              envLabelCount++;
+            }
+            
             if (envLabelCount > 1) {
               throw 'More than one environment label is attached to the PR.'
             }

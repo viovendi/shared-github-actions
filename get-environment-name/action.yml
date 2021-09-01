@@ -1,0 +1,35 @@
+name:  Get environment name
+description: Get environment name from the label attached to PR
+outputs:
+  environment:
+    description: Environment
+    value: ${{ steps.get-environment-name.outputs.result }}
+runs:
+  using: composite
+  steps:
+    - name: Get environment name
+        id: get-environment-name
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const result = await github.request('https://api.github.com/repos/viovendi/viovendi-worker/pulls/966');
+
+            // if more than one environment label is attached to the PR, throw an exception
+            var envLabelCount = 0;
+            for (const label of result.data.labels) {
+              envLabelCount++;
+              if (envLabelCount > 1) {
+                throw 'More than one environment label is attached to the PR.'
+              }
+            }
+
+            var environment = '';
+            for (const label of result.data.labels) {
+              if (label.name.startsWith('cicd:deploy:')) {
+                environment = label.name.replace('cicd:deploy:', '');
+                break;
+              }
+            }
+
+            return environment;
+          result-encoding: string

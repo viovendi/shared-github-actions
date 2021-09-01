@@ -12,7 +12,7 @@ runs:
       uses: actions/github-script@v4
       with:
         script: |
-          const result = await github.request('https://api.github.com/repos/viovendi/viovendi-worker/pulls/${{ context.payload.pull_request.id }}');
+          const result = await github.request('https://api.github.com/repos/viovendi/viovendi-worker/pulls/' + context.payload.pull_request.number);
 
           // if more than one environment label is attached to the PR, throw an exception
           var envLabelCount = 0;

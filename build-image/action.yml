@@ -12,6 +12,10 @@ inputs:
   aws-region:
     description: AWS region
     required: true
+  docker-path:
+    description: Docker path
+    required: false
+    default: .
 runs:
   using: composite
   steps:
@@ -44,12 +48,13 @@ runs:
         ECR_REPOSITORY: ${{ inputs.ecr-repository }}
         GITHUB_COMMIT_HASH: ${{ steps.get-current-commit-hash.outputs.commit-hash }}
         GITHUB_BRANCH_NAME: ${{ steps.get-current-branch-name.outputs.branch-name }}
+        DOCKER_PATH: ${{ inputs.docker-path }}
       run: |
         docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_BRANCH_NAME || true
         docker build \
           -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_COMMIT_HASH \
           -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_BRANCH_NAME \
           --cache-from $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_BRANCH_NAME \
-          .
+          $DOCKER_PATH
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_COMMIT_HASH
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_BRANCH_NAME

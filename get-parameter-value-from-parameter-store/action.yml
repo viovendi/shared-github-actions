@@ -1,0 +1,19 @@
+name:  Get parameter value from parameter store
+description: Get paramneter value from AWS Systems Manager Parameter Store
+inputs:
+  parameter-name:
+    description: Parameter name
+    required: true
+outputs:
+  parameter-value:
+    description: Parameter value
+    value: ${{ steps.get-parameter-value.outputs.parameter-value }}
+runs:
+  using: composite
+  steps:
+    - name: Get parameter value
+      id: get-parameter-value
+      shell: bash
+      run: |
+          PARAMETER_VALUE=`aws ssm get-parameters --names ${{ inputs.parameter-name }} --query 'Parameters[0].Value' --output text`
+          echo "::set-output name=parameter-value::$PARAMETER_VALUE"

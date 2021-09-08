@@ -6,58 +6,40 @@ inputs:
   environment:
     description: Environment
     required: true
-  ecr-repository:
-    description: ECR repository
-    required: true
-  aws-access-key-id:
-    description: AWS access key id
-    required: true
-  aws-secret-access-key:
-    description: AWS secret access key
-    required: true
-  aws-region:
-    description: AWS region
-    required: true
+  cf-stack-name-suffix:
+    description: CloudFormation stack name suffix with trailing '-' (e.g. -database)
+    required: false
+    default: ''
+  cf-template-path:
+    description: CloudFormation template path in the repository (e.g. ./infrastructure/infrastructure.yml)
+    required: false
+    default: './infrastructure/infrastructure.yml'
+  cf-parameters:
+    description: CloudFormation parameters divided by whitespace, Infrastructure parameter should not be specified (e.g. ImageTag=123 CustomParameter=value)
+    required: false
+    default: ''
 runs:
   using: composite
   steps:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ inputs.aws-access-key-id }}
-        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
-        aws-region: ${{ inputs.aws-region }}
-
-    - name: Get current commit hash
-      id: get-current-commit-hash
-      uses: viovendi/shared-github-actions/get-current-commit-hash@master
-
-    - name: Check if the image exists
-      shell: bash
-      run: |
-        aws ecr describe-images \
-          --repository-name ${{ inputs.ecr-repository }} \
-          --image-ids imageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }}
-
     - name: Package infrastructure
       shell: bash
       run: |
         aws cloudformation package \
-          --template-file ./infrastructure/infrastructure.yml \
+          --template-file ${{ inputs.cf-template-path }} \
           --s3-bucket doo-infrastructure \
           --s3-prefix ${{ inputs.microservice-name }} \
-          --output-template-file ./infrastructure/compiled-infrastructure.yml
+          --output-template-file ./infrastructure/compiled.yml
 
     - name: Deploy infrastructure
       shell: bash
       run: |
         aws cloudformation deploy \
-          --template-file ./infrastructure/compiled-infrastructure.yml \
-          --stack-name ${{ format('{0}-{1}', inputs.microservice-name, inputs.environment) }} \
+          --template-file ./infrastructure/compiled.yml \
+          --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }} \
           --s3-bucket doo-infrastructure \
           --s3-prefix ${{ inputs.microservice-name }} \
-          --parameter-overrides Infrastructure=${{ inputs.environment }} ImageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }} \
+          --parameter-overrides Infrastructure=${{ inputs.environment }} ${{ inputs.cf-parameters }} \
           --capabilities CAPABILITY_IAM

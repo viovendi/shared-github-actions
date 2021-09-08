@@ -1,0 +1,34 @@
+name: Deploy microservice infrastructure
+inputs:
+  microservice-name:
+    description: Microservice short name
+    required: true
+  environment:
+    description: Environment
+    required: true
+  ecr-repository:
+    description: ECR repository
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Get current commit hash
+      id: get-current-commit-hash
+      uses: viovendi/shared-github-actions/get-current-commit-hash@master
+
+    - name: Check if the image exists
+      shell: bash
+      run: |
+        aws ecr describe-images \
+          --repository-name ${{ inputs.ecr-repository }} \
+          --image-ids imageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }}
+
+    - name: Deploy infrastructure
+      uses: viovendi/shared-github-actions/deploy-infrastructure@master
+      with:
+        microservice-name: ${{ inputs.microservice-name }}
+        environment: ${{ inputs.environment }}
+        cf-parameters: ImageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }}

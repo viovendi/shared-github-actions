@@ -14,6 +14,9 @@ runs:
   using: composite
   steps:
     - name: Cancel infrastructure update
+      env:
+        STACK_NAME: ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}
       shell: bash
       run: |
-        aws cloudformation cancel-update-stack --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}
+        aws cloudformation cancel-update-stack --stack-name $STACK_NAME
+        aws cloudformation wait stack-rollback-complete --stack-name $STACK_NAME

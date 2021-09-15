@@ -1,0 +1,24 @@
+name:  Invalidate CDN cache
+inputs:
+  environment:
+    description: Environment
+    required: true
+  paths:
+    description: The space-separated paths to be invalidated
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Get distribution id
+      id: get-distribution-id
+      uses: viovendi/shared-github-actions/get-infrastructure-export-value@master
+      with:
+        export-name: ${{ format('dnc-{0}-distribution-id', inputs.environment) }}
+
+    - name: Invalidate cache
+      shell: bash
+      run: |
+        INVALIDATION_ID=`aws cloudfront create-invalidation --distribution-id ${{ steps.get-distribution-id.outputs.export-value }} --paths '${{ inputs.environment }}' --query 'Invalidation.Id' --output text`
+        aws cloudfront wait invalidation-completed \
+          --distribution-id ${{ steps.get-distribution-id.outputs.export-value }} \
+          --id $INVALIDATION_ID

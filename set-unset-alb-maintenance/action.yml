@@ -1,0 +1,40 @@
+name:  Set/unset ALB maintenance
+inputs:
+  microservice-name:
+    description: Microservice short name
+    required: true
+  environment:
+    description: Environment
+    required: true
+  maintenance-enabled:
+    description: Is maintenance enabled? (true or false)
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Get ALB rule ARN
+      id: get-alb-rule-arn
+      uses: viovendi/shared-github-actions/get-infrastructure-export-value@master
+      with:
+        export-name: ${{ format('{0}-{1}-http-listener-maintenance-rule-arn', inputs.microservice-name, inputs.environment) }}
+
+    - name: Enable maintenance mode
+      shell: bash
+      run: |
+        if [[ "${{ inputs.maintenance-enabled }}" == "true" ]]; then
+          aws elbv2 modify-rule \
+            --conditions '[{"Field": "path-pattern", "Values": ["/*"]}]' \
+            --rule-arn ${{ steps.get-alb-rule-arn.outputs.export-value }}
+        fi
+        exit 0
+
+    - name: Disable maintenance mode
+      shell: bash
+      run: |
+        if [[ "${{ inputs.maintenance-enabled }}" == "false" ]]; then
+          aws elbv2 modify-rule \
+            --conditions '[{"Field":"path-pattern","Values":["/*"]},{"Field":"http-header","HttpHeaderConfig":{"HttpHeaderName":"maintenance-mode","Values":["95bf0101-6da1-4396-b449-ade64b0b9203"]}}]' \
+            --rule-arn ${{ steps.get-alb-rule-arn.outputs.export-value }}
+        fi
+        exit 0
+      

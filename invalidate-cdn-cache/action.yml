@@ -18,7 +18,7 @@ runs:
     - name: Invalidate cache
       shell: bash
       run: |
-        INVALIDATION_ID=`aws cloudfront create-invalidation --distribution-id ${{ steps.get-distribution-id.outputs.export-value }} --paths '${{ inputs.paths }}' --query 'Invalidation.Id' --output text`
+        INVALIDATION_ID=`aws cloudfront create-invalidation --distribution-id ${{ steps.get-distribution-id.outputs.export-value }} --paths ${{ inputs.paths }} --query 'Invalidation.Id' --output text`
         aws cloudfront wait invalidation-completed \
           --distribution-id ${{ steps.get-distribution-id.outputs.export-value }} \
           --id $INVALIDATION_ID

@@ -1,0 +1,19 @@
+name:  Get infrastructure export value
+description: Get CloudFormation stack export value
+inputs:
+  export-name:
+    description: Export name
+    required: true
+outputs:
+  export-value:
+    description: Export value
+    value: ${{ steps.get-export-value.outputs.export-value }}
+runs:
+  using: composite
+  steps:
+    - name: Get export value
+      id: get-export-value
+      shell: bash
+      run: |
+        EXPORT_VALUE=`aws cloudformation list-exports --query "Exports[?Name=='${{ inputs.export-name }}'].Value" --output text`
+        echo "::set-output name=export-value::$EXPORT_VALUE"

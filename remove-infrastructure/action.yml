@@ -14,9 +14,7 @@ runs:
   using: composite
   steps:
     - name: Remove infrastructure
-      env:
-        STACK_NAME: ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}
       shell: bash
       run: |
-        aws cloudformation delete-stack --stack-name $STACK_NAME
-        aws cloudformation wait stack-delete-complete --stack-name $STACK_NAME
+        aws cloudformation delete-stack --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}
+        aws cloudformation wait stack-delete-complete --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}

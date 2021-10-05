@@ -6,6 +6,10 @@ inputs:
   environment:
     description: Environment
     required: true
+  cf-stack-name-suffix:
+    description: CloudFormation stack name suffix with trailing '-' (e.g. -database)
+    required: false
+    default: ''
   ecr-repository:
     description: ECR repository
     required: true
@@ -31,4 +35,5 @@ runs:
       with:
         microservice-name: ${{ inputs.microservice-name }}
         environment: ${{ inputs.environment }}
+        cf-stack-name-suffix: ${{ inputs.cf-stack-name-suffix }}
         cf-parameters: ImageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }}

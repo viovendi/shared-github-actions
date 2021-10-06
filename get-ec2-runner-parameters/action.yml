@@ -1,0 +1,29 @@
+name:  Get parameters for self-hosted GitHub Actions EC2 runner
+inputs:
+  environment:
+    description: Environment
+    required: true
+outputs:
+  subnet-id:
+    description: Subnet Id
+    value: ${{ steps.get-subnet-id.outputs.value }}
+  security-group-id:
+    description: Security Group Id
+    value: ${{ steps.get-security-group-id.outputs.value }}
+runs:
+  using: composite
+  steps:
+    - name: Get subnet id
+      id: get-subnet-id
+      shell: bash
+      run: |
+        VALUE=`aws ec2 describe-subnets --filters Name=tag:Name,Values=doo-${{ inputs.environment }}-be-private-subnet1 --query "Subnets[].SubnetId" --output text`
+        echo "::set-output name=value::$VALUE"
+
+    - name: Get security group id
+      id: get-security-group-id
+      shell: bash
+      run: |
+        VALUE=`aws ec2 describe-security-groups --filters Name=tag:Name,Values=base-${{ inputs.environment }}-base-ec2-github-runner --query "SecurityGroups[].GroupId" --output textt`
+        echo "::set-output name=value::$VALUE"
+

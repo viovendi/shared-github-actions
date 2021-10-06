@@ -24,6 +24,6 @@ runs:
       id: get-security-group-id
       shell: bash
       run: |
-        VALUE=`aws ec2 describe-security-groups --filters Name=tag:Name,Values=base-${{ inputs.environment }}-base-ec2-github-runner --query "SecurityGroups[].GroupId" --output textt`
+        VALUE=`aws ec2 describe-security-groups --filters Name=tag:Name,Values=base-${{ inputs.environment }}-base-ec2-github-runner --query "SecurityGroups[].GroupId" --output text`
         echo "::set-output name=value::$VALUE"
 

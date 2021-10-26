@@ -16,7 +16,7 @@ runs:
       id: get-alb-rule-arn
       uses: viovendi/shared-github-actions/get-infrastructure-export-value@master
       with:
-        export-name: ${{ format('{0}-{1}-http-listener-maintenance-rule-arn', inputs.microservice-name, inputs.environment) }}
+        export-name: ${{ format('{0}-{1}-listener-maintenance-rule-arn', inputs.microservice-name, inputs.environment) }}
 
     - name: Enable maintenance mode
       shell: bash

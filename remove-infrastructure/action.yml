@@ -16,12 +16,11 @@ runs:
     - name: Remove infrastructure
       shell: bash
       run: | # The condition is added for security reasons. Remove the condition temporarily to allow production infrastructure removal.
-        if [[ "${{ inputs.environment }}" == *"staging"* ]]; then
+        if [[ "${{ inputs.environment }}" =~ "^staging[1-8]$" ]]; then
           aws cloudformation delete-stack --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}
           aws cloudformation wait stack-delete-complete --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}
-          exit 0
         fi
-        if [[ "${{ inputs.environment }}" != *"staging"* ]]; then
-          echo "Production infrastructure is protected from removal so the removal is canceled."
-          exit 1
+        if [[ "${{ inputs.environment }}" !=~ ^staging[1-8]$ ]]; then
+          echo "Only staging infrastructure can be removed, so the removal is canceled."
         fi
+        exit 0

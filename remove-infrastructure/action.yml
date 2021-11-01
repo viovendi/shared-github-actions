@@ -20,7 +20,7 @@ runs:
           aws cloudformation delete-stack --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}
           aws cloudformation wait stack-delete-complete --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}
         fi
-        if [[ "${{ inputs.environment }}" !=~ ^staging[1-8]$ ]]; then
+        if [[ "${{ inputs.environment }}" !=~ "^staging[1-8]$" ]]; then
           echo "Only staging infrastructure can be removed, so the removal is canceled."
         fi
         exit 0

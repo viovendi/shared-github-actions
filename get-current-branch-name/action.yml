@@ -10,7 +10,8 @@ runs:
     - name: Get branch name for pull_request trigger
       shell: bash
       run: |
-        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+        if [[ "${{ github.event_name }}" == "pull_request" ]];
+        then
           echo "BRANCH_NAME=${GITHUB_HEAD_REF#refs/heads/}" >> $GITHUB_ENV
         fi
         exit 0
@@ -18,7 +19,8 @@ runs:
     - name: Get branch name for other triggers
       shell: bash
       run: |
-        if [[ "${{ github.event_name }}" != "pull_request" ]]; then
+        if [[ "${{ github.event_name }}" != "pull_request" ]];
+        then
           echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
         fi
         exit 0

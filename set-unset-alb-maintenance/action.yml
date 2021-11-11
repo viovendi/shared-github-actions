@@ -21,7 +21,8 @@ runs:
     - name: Enable maintenance mode
       shell: bash
       run: |
-        if [[ "${{ inputs.maintenance-enabled }}" == "true" ]]; then
+        if [[ "${{ inputs.maintenance-enabled }}" == "true" ]]; 
+        then
           aws elbv2 modify-rule \
             --conditions '[{"Field": "path-pattern", "Values": ["/*"]}]' \
             --rule-arn ${{ steps.get-alb-rule-arn.outputs.export-value }}
@@ -31,7 +32,8 @@ runs:
     - name: Disable maintenance mode
       shell: bash
       run: |
-        if [[ "${{ inputs.maintenance-enabled }}" == "false" ]]; then
+        if [[ "${{ inputs.maintenance-enabled }}" == "false" ]]; 
+        then
           aws elbv2 modify-rule \
             --conditions '[{"Field":"path-pattern","Values":["/*"]},{"Field":"http-header","HttpHeaderConfig":{"HttpHeaderName":"maintenance-mode","Values":["95bf0101-6da1-4396-b449-ade64b0b9203"]}}]' \
             --rule-arn ${{ steps.get-alb-rule-arn.outputs.export-value }}

@@ -37,3 +37,18 @@ runs:
         environment: ${{ inputs.environment }}
         cf-stack-name-suffix: ${{ inputs.cf-stack-name-suffix }}
         cf-parameters: ImageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }}
+
+    - name: Create release tag
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const result = await github.rest.git.createTag({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag: 'release_microservice_' + Date.now(),
+            message: 'Create a release tag on the commit after successful deployment from the master branch',
+            object: '${{ steps.get-current-commit-hash.outputs.commit-hash }}',
+            type: 'commit'
+          });
+
+          console.log(JSON.stringify(result))

@@ -42,13 +42,38 @@ runs:
       uses: actions/github-script@v5
       with:
         script: |
-          const result = await github.rest.git.createTag({
+          const tagName = 'release_microservice_' + Date.now();
+
+          const tagResult = await github.rest.git.createTag({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            tag: 'release_microservice_' + Date.now(),
+            tag: tagName,
             message: 'Create a release tag on the commit after successful deployment from the master branch',
             object: '${{ steps.get-current-commit-hash.outputs.commit-hash }}',
             type: 'commit'
           });
 
-          console.log(JSON.stringify(result))
+          console.log(JSON.stringify(tagResult));
+
+          if (tagResult.status !== 201) {
+            core.setFailed(`The tag creation is failed`);
+            return;
+          }
+
+          // From GitHub API docs: 
+          // Note that creating a tag object does not create the reference that makes a tag in Git. 
+          // If you want to create an annotated tag in Git, you have to do this call to create the tag object, and then create the refs/tags/[tag] reference.
+          const referenceResult = await github.rest.git.createRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: `refs/tags/${tagName}`,
+            sha: '${{ steps.get-current-commit-hash.outputs.commit-hash }}'
+          });
+          
+          console.log(JSON.stringify(referenceResult));
+
+          if (referenceResult.status !== 201) {
+            core.setFailed(`The reference creation is failed`);
+            return;
+          }
+

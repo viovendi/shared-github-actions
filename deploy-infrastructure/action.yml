@@ -67,6 +67,12 @@ runs:
       uses: actions/github-script@v5
       with:
         script: |
+          const environment = '${{ inputs.environment }}';
+          if(!environment.includes('production')){
+            core.info('The release tag creation is skipped for non-production deployment')
+            return;
+          }
+
           const date = new Date();
           const [month, day, year] = [date.getUTCMonth(), date.getUTCDate(), date.getUTCFullYear()];
           const [hour, minutes, seconds, milliseconds] = [date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds()];

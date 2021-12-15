@@ -67,7 +67,12 @@ runs:
       uses: actions/github-script@v5
       with:
         script: |
-          const tagName = `release_${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}_${Date.now()}`;
+          const date = new Date();
+          const [month, day, year] = [date.getUTCMonth(), date.getUTCDate(), date.getUTCFullYear()];
+          const [hour, minutes, seconds, milliseconds] = [date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds()];
+          const dateString = `${year}-${month}-${day}_${hour}-${minutes}-${seconds}-${milliseconds}_utc`
+          const tagName = `release_${dateString}`;
+          const releaseName = `release_${dateString} (CloudFormation stack: ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }})`
 
           const tagResult = await github.rest.git.createTag({
             owner: context.repo.owner,
@@ -102,6 +107,7 @@ runs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             tag_name: tagName,
+            name: releaseName,
             generate_release_notes: true
           });
 

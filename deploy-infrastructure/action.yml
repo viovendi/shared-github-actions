@@ -63,6 +63,7 @@ runs:
       id: get-current-commit-hash
       uses: viovendi/shared-github-actions/get-current-commit-hash@master
 
+    # Run only for deployments to production
     - name: Create release tag
       uses: actions/github-script@v5
       with:

@@ -58,3 +58,67 @@ runs:
           echo "Unrecognizable environment name"
           exit 1
         fi
+
+    - name: Get current commit hash
+      id: get-current-commit-hash
+      uses: viovendi/shared-github-actions/get-current-commit-hash@master
+
+    # Run only for deployments to production
+    - name: Create release tag
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const environment = '${{ inputs.environment }}';
+          if(!environment.includes('production')){
+            core.info('The release tag creation is skipped for non-production deployment')
+            return;
+          }
+
+          const date = new Date();
+          const [month, day, year] = [date.getUTCMonth(), date.getUTCDate(), date.getUTCFullYear()];
+          const [hour, minutes, seconds, milliseconds] = [date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds()];
+          const dateString = `${year}-${month}-${day}_${hour}-${minutes}-${seconds}-${milliseconds}Z`
+          const tagName = `release_${dateString}`;
+          const releaseName = `release_${dateString} (stack: ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }})`
+
+          const tagResult = await github.rest.git.createTag({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag: tagName,
+            message: 'Create a release tag on the commit after successful deployment from the master branch',
+            object: '${{ steps.get-current-commit-hash.outputs.commit-hash }}',
+            type: 'commit'
+          });
+
+          if (tagResult.status !== 201) {
+            core.setFailed(`The tag creation is failed`);
+            return;
+          }
+
+          // From GitHub API docs: 
+          // Note that creating a tag object does not create the reference that makes a tag in Git. 
+          // If you want to create an annotated tag in Git, you have to do this call to create the tag object, and then create the refs/tags/[tag] reference.
+          const referenceResult = await github.rest.git.createRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: `refs/tags/${tagName}`,
+            sha: '${{ steps.get-current-commit-hash.outputs.commit-hash }}'
+          });
+
+          if (referenceResult.status !== 201) {
+            core.setFailed(`The reference creation is failed`);
+            return;
+          }
+
+          const releaseResult = await github.rest.repos.createRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag_name: tagName,
+            name: releaseName,
+            generate_release_notes: true
+          });
+
+          if (referenceResult.status !== 201) {
+            core.setFailed(`The release creation is failed`);
+            return;
+          }

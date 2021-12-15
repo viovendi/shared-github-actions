@@ -59,6 +59,10 @@ runs:
           exit 1
         fi
 
+    - name: Get current commit hash
+      id: get-current-commit-hash
+      uses: viovendi/shared-github-actions/get-current-commit-hash@master
+
     - name: Create release tag
       uses: actions/github-script@v5
       with:

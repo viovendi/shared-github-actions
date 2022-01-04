@@ -75,9 +75,17 @@ runs:
           }
 
           const date = new Date();
-          const [month, day, year] = [date.getUTCMonth(), date.getUTCDate(), date.getUTCFullYear()];
-          const [hour, minutes, seconds, milliseconds] = [date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds()];
-          const dateString = `${year}-${month}-${day}_${hour}-${minutes}-${seconds}-${milliseconds}Z`
+
+          const year = date.getUTCFullYear();
+          const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
+          const day = date.getUTCDate().toString().padStart(2, "0");
+
+          const hours = date.getUTCHours().toString().padStart(2, "0");
+          const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+          const seconds = date.getUTCSeconds().toString().padStart(2, "0");
+          const milliseconds = date.getUTCMilliseconds().toString().padStart(3, "0");
+
+          const dateString = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}-${milliseconds}Z`
           const tagName = `release_${dateString}`;
           const releaseName = `release_${dateString} (stack: ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }})`
 

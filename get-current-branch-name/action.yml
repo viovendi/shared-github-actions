@@ -19,9 +19,18 @@ runs:
     - name: Get branch name for other triggers
       shell: bash
       run: |
-        if [[ "${{ github.event_name }}" != "pull_request" ]];
+        if [[ "${{ github.event_name }}" != "pull_request" ]] && [[ $GITHUB_REF == refs/heads/* ]];
         then
           echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+        fi
+        exit 0
+
+    - name: Get tag name for other triggers
+      shell: bash
+      run: |
+        if [[ "${{ github.event_name }}" != "pull_request" ]] && [[ $GITHUB_REF == refs/tags/* ]];
+        then
+          echo "BRANCH_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
         fi
         exit 0
 

@@ -23,7 +23,7 @@ runs:
 
     - name: Get current branch name
       id: get-current-branch-name
-      uses: viovendi/shared-github-actions/get-current-branch-name@cp-1819
+      uses: viovendi/shared-github-actions/get-current-branch-name@master
 
     - name: Build image
       shell: bash

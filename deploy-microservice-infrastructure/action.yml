@@ -27,7 +27,7 @@ runs:
       shell: bash
       run: |
         aws ecr describe-images \
-          --repository-name ${{ inputs.ecr-reposistory }} \
+          --repository-name ${{ inputs.ecr-repository }} \
           --image-ids imageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }}
 
     - name: Deploy infrastructure

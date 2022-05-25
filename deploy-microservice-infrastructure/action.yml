@@ -23,6 +23,10 @@ runs:
       id: get-current-commit-hash
       uses: viovendi/shared-github-actions/get-current-commit-hash@master
 
+    - name: Get current branch name
+      id: get-current-branch-name
+      uses: viovendi/shared-github-actions/get-current-branch-name@master
+
     - name: Check if the image exists
       shell: bash
       run: |
@@ -37,3 +41,16 @@ runs:
         environment: ${{ inputs.environment }}
         cf-stack-name-suffix: ${{ inputs.cf-stack-name-suffix }}
         cf-parameters: ImageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }}
+
+    - name: Log deployment
+      uses: fjogeleit/http-request-action@v1
+      with:
+        url: https://hook.doo.integromat.celonis.com/jpia8vor9dg5himhbkwgcx0s77xdvsd1
+        method: POST
+        data: |
+          {
+            "microservice": "${{ inputs.microservice-name }}",
+            "environment": "${{ inputs.environment }}",
+            "branch": "${{ steps.get-current-branch-name.outputs.branch-name }}",
+            "image": "${{ steps.get-current-commit-hash.outputs.commit-hash }}"
+          }

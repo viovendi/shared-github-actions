@@ -50,7 +50,7 @@ runs:
         data: |
           {
             "microservice": "${{ inputs.microservice-name }}",
-            "cf_stack": "infrastructure"
+            "cf_stack": "infrastructure",
             "environment": "${{ inputs.environment }}",
             "branch": "${{ steps.get-current-branch-name.outputs.branch-name }}",
             "image_tag": "${{ steps.get-current-commit-hash.outputs.commit-hash }}",

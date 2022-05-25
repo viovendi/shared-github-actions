@@ -31,7 +31,7 @@ runs:
           --image-ids imageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }}
 
     - name: Deploy infrastructure
-      uses: viovendi/shared-github-actions/deploy-infrastructure@cp-2712
+      uses: viovendi/shared-github-actions/deploy-infrastructure@master
       with:
         microservice-name: ${{ inputs.microservice-name }}
         environment: ${{ inputs.environment }}

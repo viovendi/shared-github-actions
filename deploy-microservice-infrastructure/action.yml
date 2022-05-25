@@ -54,5 +54,5 @@ runs:
             "environment": "${{ inputs.environment }}",
             "branch": "${{ steps.get-current-branch-name.outputs.branch-name }}",
             "image_tag": "${{ steps.get-current-commit-hash.outputs.commit-hash }}",
-            "workflow_url": "https://github.com/${{ $GITHUB_REPOSITORY }}/commit/${{ steps.get-current-commit-hash.outputs.commit-hash }}/checks?check_suite_id=${{ $GITHUB_CHECK_SUITE_ID }}"
+            "workflow_url": "https://github.com/$GITHUB_REPOSITORY/commit/${{ steps.get-current-commit-hash.outputs.commit-hash }}/checks?check_suite_id=$GITHUB_CHECK_SUITE_ID"
           }

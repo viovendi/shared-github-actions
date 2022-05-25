@@ -59,10 +59,6 @@ runs:
           exit 1
         fi
 
-    - name: Get current branch name
-      id: get-current-branch-name
-      uses: viovendi/shared-github-actions/get-current-branch-name@master
-
     - name: Get current commit hash
       id: get-current-commit-hash
       uses: viovendi/shared-github-actions/get-current-commit-hash@master

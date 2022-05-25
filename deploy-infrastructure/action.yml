@@ -59,9 +59,29 @@ runs:
           exit 1
         fi
 
+    - name: Get current branch name
+      id: get-current-branch-name
+      uses: viovendi/shared-github-actions/get-current-branch-name@master
+
     - name: Get current commit hash
       id: get-current-commit-hash
       uses: viovendi/shared-github-actions/get-current-commit-hash@master
+
+    - name: Log deployment
+      uses: fjogeleit/http-request-action@v1
+      with:
+        url: https://hook.doo.integromat.celonis.com/jpia8vor9dg5himhbkwgcx0s77xdvsd1
+        method: POST
+        data: |
+          {
+            "microservice-name": "${{ inputs.microservice-name }}",
+            "environment": "${{ inputs.environment }}",
+            "cf-stack-name-suffix": "${{ inputs.cf-stack-name-suffix }}",
+            "cf-template-path": "${{ inputs.cf-template-path }}",
+            "cf-parameters": "${{ inputs.cf-parameters }}",
+            "branch-name": "${{ steps.get-current-branch-name.outputs.branch-name }}",
+            "commit-hash": "${{ steps.get-current-commit-hash.outputs.commit-hash }}"
+          }
 
     # Run only for deployments to production
     - name: Create release tag

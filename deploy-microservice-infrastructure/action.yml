@@ -23,35 +23,17 @@ runs:
       id: get-current-commit-hash
       uses: viovendi/shared-github-actions/get-current-commit-hash@master
 
-    - name: Get current branch name
-      id: get-current-branch-name
-      uses: viovendi/shared-github-actions/get-current-branch-name@master
-
     - name: Check if the image exists
       shell: bash
       run: |
         aws ecr describe-images \
-          --repository-name ${{ inputs.ecr-repository }} \
+          --repository-name ${{ inputs.ecr-reposistory }} \
           --image-ids imageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }}
 
     - name: Deploy infrastructure
-      uses: viovendi/shared-github-actions/deploy-infrastructure@master
+      uses: viovendi/shared-github-actions/deploy-infrastructure@cp-2712
       with:
         microservice-name: ${{ inputs.microservice-name }}
         environment: ${{ inputs.environment }}
         cf-stack-name-suffix: ${{ inputs.cf-stack-name-suffix }}
         cf-parameters: ImageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }}
-
-    - name: Log deployment
-      uses: fjogeleit/http-request-action@v1
-      with:
-        url: https://hook.doo.integromat.celonis.com/jpia8vor9dg5himhbkwgcx0s77xdvsd1
-        method: POST
-        data: |
-          {
-            "microservice": "${{ inputs.microservice-name }}",
-            "cf_stack": "infrastructure",
-            "environment": "${{ inputs.environment }}",
-            "branch": "${{ steps.get-current-branch-name.outputs.branch-name }}",
-            "image_tag": "${{ steps.get-current-commit-hash.outputs.commit-hash }}"
-          }

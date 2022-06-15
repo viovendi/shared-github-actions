@@ -1,0 +1,39 @@
+name: Build image
+
+on:
+  workflow_call:
+    inputs:
+      ecr-repository:
+        description: ECR repository
+        type: string
+        required: true
+      docker-path:
+        description: Docker path
+        type: string
+        required: false
+        default: .
+    secrets:
+      aws-access-key-id:
+        required: true
+      aws-secret-access-key:
+        required: true
+      aws-region:
+        required: true
+
+jobs:
+  build-worker:
+    name: Build image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-region: ${{ secrets.aws-region }}
+
+      - name: Build image
+        uses: viovendi/shared-github-actions/build-image@master
+        with:
+          ecr-repository: ${{ inputs.ecr-repository }}
+          docker-path: ${{ inputs.docker-path }}

@@ -32,8 +32,29 @@ jobs:
           aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
           aws-region: ${{ secrets.aws-region }}
 
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Get current commit hash
+        id: get-current-commit-hash
+        uses: viovendi/shared-github-actions/get-current-commit-hash@master
+
+      - name: Get current branch name
+        id: get-current-branch-name
+        uses: viovendi/shared-github-actions/get-current-branch-name@master
+
       - name: Build image
-        uses: viovendi/shared-github-actions/build-image@master
-        with:
-          ecr-repository: ${{ inputs.ecr-repository }}
-          docker-path: ${{ inputs.docker-path }}
+        shell: bash
+        run: |
+          docker pull ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-branch-name.outputs.branch-name }} || true
+          docker build \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-commit-hash.outputs.commit-hash }} \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-branch-name.outputs.branch-name }} \
+            --cache-from ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-branch-name.outputs.branch-name }} \
+            ${{ inputs.docker-path }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-commit-hash.outputs.commit-hash }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-branch-name.outputs.branch-name }}

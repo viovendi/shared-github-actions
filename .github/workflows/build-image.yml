@@ -1,0 +1,60 @@
+name: Build image
+
+on:
+  workflow_call:
+    inputs:
+      ecr-repository:
+        description: ECR repository
+        type: string
+        required: true
+      docker-path:
+        description: Docker path
+        type: string
+        required: false
+        default: .
+    secrets:
+      aws-access-key-id:
+        required: true
+      aws-secret-access-key:
+        required: true
+      aws-region:
+        required: true
+
+jobs:
+  build-worker:
+    name: Build image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-region: ${{ secrets.aws-region }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Get current commit hash
+        id: get-current-commit-hash
+        uses: viovendi/shared-github-actions/get-current-commit-hash@master
+
+      - name: Get current branch name
+        id: get-current-branch-name
+        uses: viovendi/shared-github-actions/get-current-branch-name@master
+
+      - name: Build image
+        shell: bash
+        run: |
+          docker pull ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-branch-name.outputs.branch-name }} || true
+          docker build \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-commit-hash.outputs.commit-hash }} \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-branch-name.outputs.branch-name }} \
+            --cache-from ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-branch-name.outputs.branch-name }} \
+            ${{ inputs.docker-path }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-commit-hash.outputs.commit-hash }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-branch-name.outputs.branch-name }}

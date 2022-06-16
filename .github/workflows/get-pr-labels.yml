@@ -14,11 +14,11 @@ on:
         value: ${{ contains(github.event.pull_request.labels.*.name, 'cicd:quality') }}
       environment-name:
         description: "Environment name extracted from the cicd:deploy:* label"
-        value: ${{ jobs.get-environment-name.outputs.environment-name }}
+        value: ${{ jobs.get-pr-labels.outputs.environment-name }}
 
 jobs:
-  get-environment-name:
-    name: Get environment name
+  get-pr-labels:
+    name: Get PR labels
     runs-on: ubuntu-latest
     outputs:
       environment-name: ${{ steps.get-environment-name.outputs.result }}

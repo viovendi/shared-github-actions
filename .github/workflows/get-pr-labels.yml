@@ -2,6 +2,7 @@ name: Get PR labels
 
 on:
   workflow_call:
+<<<<<<< HEAD
     outputs:
       build-label-present:
         description: "cicd:build label is present in the PR"
@@ -22,6 +23,18 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       environment-name: ${{ steps.get-environment-name.outputs.result }}
+=======
+
+jobs:
+  get-pr-labels:
+    name: Get PR labels
+    runs-on: ubuntu-latest
+    outputs:
+      build-label-present: ${{ contains(github.event.pull_request.labels.*.name, 'cicd:build') }}
+      deploy-label-present: ${{ contains(toJSON(github.event.pull_request.labels.*.name), 'cicd:deploy:') }}
+      quality-label-present: ${{ contains(github.event.pull_request.labels.*.name, 'cicd:quality') }}
+      deploy-label-value: ${{ steps.get-environment-name.outputs.result }}
+>>>>>>> master
     steps:
       - name: Get environment name
         id: get-environment-name

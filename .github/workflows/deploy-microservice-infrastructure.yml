@@ -1,4 +1,4 @@
-name: Deploy microservice
+name: Deploy microservice infrastructure
 
 on:
   workflow_call:
@@ -22,8 +22,8 @@ on:
         required: true
 
 jobs:
-  deploy-microservice:
-    name: Deploy microservice
+  deploy-microservice-infrastructure:
+    name: Deploy microservice infrastructure
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials

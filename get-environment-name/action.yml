@@ -1,3 +1,5 @@
+# TODO: remove this shared action after migration to shared workflows
+
 name:  Get environment name
 description: Get environment name from the label attached to PR
 outputs:

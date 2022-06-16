@@ -1,0 +1,44 @@
+name: Get PR labels
+
+on:
+  workflow_call:
+
+jobs:
+  get-pr-labels:
+    name: Get PR labels
+    runs-on: ubuntu-latest
+    outputs:
+      build-label-present: ${{ contains(github.event.pull_request.labels.*.name, 'cicd:build') }}
+      deploy-label-present: ${{ contains(toJSON(github.event.pull_request.labels.*.name), 'cicd:deploy:') }}
+      quality-label-present: ${{ contains(github.event.pull_request.labels.*.name, 'cicd:quality') }}
+      deploy-label-value: ${{ steps.get-environment-name.outputs.result }}
+    steps:
+      - name: Get environment name
+        id: get-environment-name
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const result = await github.request('https://api.github.com/repos/' + context.repo.owner + '/' + context.repo.repo + '/pulls/' + context.payload.pull_request.number);
+
+            // if more than one environment label is attached to the PR, throw an exception
+            var envLabelCount = 0;
+            for (const label of result.data.labels) {
+              if (label.name.startsWith('cicd:deploy:')) {
+                envLabelCount++;
+              }
+              
+              if (envLabelCount > 1) {
+                throw 'More than one environment label is attached to the PR.'
+              }
+            }
+
+            var environment = '';
+            for (const label of result.data.labels) {
+              if (label.name.startsWith('cicd:deploy:')) {
+                environment = label.name.replace('cicd:deploy:', '');
+                break;
+              }
+            }
+
+            return environment;
+          result-encoding: string

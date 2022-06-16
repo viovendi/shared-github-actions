@@ -1,0 +1,64 @@
+name: Deploy infrastructure
+
+on:
+  workflow_call:
+    inputs:
+      microservice-name:
+        description: Microservice short name
+        type: string
+        required: true
+      environment:
+        description: Environment
+        type: string
+        required: true
+      cf-stack-name-suffix:
+        description: CloudFormation stack name suffix with trailing '-' (e.g. -database)
+        type: string
+        required: false
+        default: ''
+      cf-template-path:
+        description: CloudFormation template path in the repository (e.g. ./infrastructure/infrastructure.yml)
+        required: false
+        default: './infrastructure/infrastructure.yml'
+      cf-parameters:
+        description: CloudFormation parameters divided by whitespace, Infrastructure parameter should not be specified (e.g. ImageTag=123 CustomParameter=value)
+        required: false
+        default: ''
+
+jobs:
+  deploy-infrastructure:
+    name: Deploy infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy infrastructure
+        timeout-minutes: 30
+        uses: viovendi/shared-github-actions/deploy-infrastructure@master
+        with:
+          microservice-name: ${{ inputs.microservice-name }}
+          environment: ${{ inputs.environment }}
+          cf-stack-name-suffix: ${{ inputs.cf-stack-name-suffix }}
+          cf-template-path: ${{ inputs.cf-template-pat }}
+          cf-parameters: ${{ inputs.cf-parameters }}
+      
+      - name: Describe infrastructure events
+        if: failure()
+        uses: viovendi/shared-github-actions/describe-infrastructure-events@master
+        with:
+          microservice-name: ${{ inputs.microservice-name }}
+          environment: ${{ inputs.environment }}
+          cf-stack-name-suffix: ${{ inputs.cf-stack-name-suffix }}
+
+      - name: Cancel infrastructure update
+        if: cancelled()
+        uses: viovendi/shared-github-actions/cancel-infrastructure-update@master
+        with:
+          microservice-name: ${{ inputs.microservice-name }}
+          environment: ${{ inputs.environment }}
+          cf-stack-name-suffix: ${{ inputs.cf-stack-name-suffix }}

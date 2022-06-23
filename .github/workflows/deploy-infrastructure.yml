@@ -46,7 +46,7 @@ jobs:
           microservice-name: ${{ inputs.microservice-name }}
           environment: ${{ inputs.environment }}
           cf-stack-name-suffix: ${{ inputs.cf-stack-name-suffix }}
-          cf-template-path: ${{ inputs.cf-template-pat }}
+          cf-template-path: ${{ inputs.cf-template-path }}
           cf-parameters: ${{ inputs.cf-parameters }}
       
       - name: Describe infrastructure events

@@ -5,12 +5,15 @@ on:
     inputs:
       microservice-name:
         description: Microservice short name
+        type: string
         required: true
       environment:
         description: Environment
+        type: string
         required: true
       cf-stack-name-suffix:
         description: CloudFormation stack name suffix with trailing '-' (e.g. -database)
+        type: string
         required: false
         default: ''
 

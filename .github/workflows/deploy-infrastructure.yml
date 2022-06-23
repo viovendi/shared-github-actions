@@ -18,10 +18,12 @@ on:
         default: ''
       cf-template-path:
         description: CloudFormation template path in the repository (e.g. ./infrastructure/infrastructure.yml)
+        type: string
         required: false
         default: './infrastructure/infrastructure.yml'
       cf-parameters:
         description: CloudFormation parameters divided by whitespace, Infrastructure parameter should not be specified (e.g. ImageTag=123 CustomParameter=value)
+        type: string
         required: false
         default: ''
 

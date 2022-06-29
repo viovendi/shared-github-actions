@@ -35,7 +35,7 @@ jobs:
           export-name: ${{ format('{0}-{1}-listener-maintenance-rule-arn', inputs.microservice-name, inputs.environment) }}
 
       - name: Enable maintenance mode
-        if: inputs.maintenance-enabled == 'true'
+        if: inputs.maintenance-enabled == true
         shell: bash
         run: |
           aws elbv2 modify-rule \
@@ -43,10 +43,9 @@ jobs:
             --rule-arn ${{ steps.get-alb-rule-arn.outputs.export-value }}
 
       - name: Disable maintenance mode
-        if: inputs.maintenance-enabled == 'false'
+        if: inputs.maintenance-enabled == false
         shell: bash
         run: |
           aws elbv2 modify-rule \
             --conditions '[{"Field":"path-pattern","Values":["/*"]},{"Field":"http-header","HttpHeaderConfig":{"HttpHeaderName":"maintenance-mode","Values":["95bf0101-6da1-4396-b449-ade64b0b9203"]}}]' \
             --rule-arn ${{ steps.get-alb-rule-arn.outputs.export-value }}
-      

@@ -26,6 +26,11 @@ on:
         type: string
         required: false
         default: ''
+      aws-region:
+        description: AWS region
+        type: string
+        required: false
+        default: eu-central-1
 
 jobs:
   deploy-infrastructure:
@@ -37,7 +42,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ inputs.aws-region }}
 
       - name: Deploy infrastructure
         timeout-minutes: 60

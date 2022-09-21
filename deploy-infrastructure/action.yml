@@ -21,9 +21,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
     - name: Get current branch name
       id: get-current-branch-name
       uses: viovendi/shared-github-actions/get-current-branch-name@master

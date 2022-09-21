@@ -44,6 +44,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ inputs.aws-region }}
 
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Deploy infrastructure
         timeout-minutes: 60
         uses: viovendi/shared-github-actions/deploy-infrastructure@master

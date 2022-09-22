@@ -1,0 +1,61 @@
+name: Start EC2 runner for environment
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Environment
+        type: string
+        required: true
+      ec2-instance-type:
+        description: EC2 instance type
+        type: string
+        required: false
+        default: t3.small
+    outputs:
+      label:
+        description: "Name of the unique label assigned to the runner"
+        value: ${{ jobs.start-runner.outputs.label }}
+      ec2-instance-id:
+        description: "EC2 Instance Id of the created runner"
+        value: ${{ jobs.start-runner.outputs.ec2-instance-id }}
+
+jobs:
+  start-runner:
+    name: Start EC2 runner for environment
+    runs-on: ubuntu-latest
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Get parameters for the specified environment.
+      # In this way the runner will be started in the VPC of the specified environment and will have access to the internal resources.
+      - name: Get EC2 runner parameters
+        id: get-ec2-runner-parameters
+        uses: viovendi/shared-github-actions/get-ec2-runner-parameters@master
+        with:
+          environment: ${{ inputs.environment }}
+
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: start
+          github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+          ec2-image-id: ami-0f6c72ce17bd23bb3
+          ec2-instance-type: ${{ inputs.ec2-instance-type }}
+          subnet-id: ${{ steps.get-ec2-runner-parameters.outputs.subnet-id }}
+          security-group-id: ${{ steps.get-ec2-runner-parameters.outputs.security-group-id }}
+          aws-resource-tags: >
+            [
+              {"Key": "Name", "Value": "ec2-github-runner"},
+              {"Key": "Microservice", "Value": "gha"},
+              {"Key": "Repository", "Value": "${{ github.repository }}"}
+            ]

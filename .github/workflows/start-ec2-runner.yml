@@ -2,6 +2,7 @@ name: Start EC2 runner
 
 on:
   workflow_call:
+    inputs:
       ec2-instance-type:
         description: EC2 instance type
         type: string

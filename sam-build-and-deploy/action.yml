@@ -4,19 +4,26 @@ description: SAM Build and Deploy
 inputs:
   environment:
     description: Environment
+    type: string
     required: true
   microservice-name:
     description: Microservice name
+    type: string
     required: true
   aws-account-id:
     description: AWS account id
+    type: string
     required: true
   aws-region:
-    description: AWS Region
-    required: true
+    description: AWS region
+    type: string
+    required: false
+    default: eu-central-1
   s3-bucket:
     description: S3 bucket
-    required: true
+    type: string
+    required: false
+    default: doo-infrastructure
 
 runs:
   using: composite

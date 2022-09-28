@@ -36,12 +36,22 @@ jobs:
           aws-region: eu-central-1
 
       # Get parameters for the specified environment.
-      # In this way the runner will be started in the VPC of the specified environment and will have access to the internal resources.
-      - name: Get EC2 runner parameters
-        id: get-ec2-runner-parameters
-        uses: viovendi/shared-github-actions/get-ec2-runner-parameters@master
-        with:
-          environment: ${{ inputs.environment }}
+      # In this way the runner will be started in the VPC of the specified environment 
+      # and will have access to the internal resources.
+
+      - name: Get subnet id
+        id: get-subnet-id
+        shell: bash
+        run: |
+          VALUE=`aws ec2 describe-subnets --filters Name=tag:Name,Values=doo-${{ inputs.environment }}-be-private-subnet1 --query "Subnets[].SubnetId" --output text`
+          echo "::set-output name=value::$VALUE"
+
+      - name: Get security group id
+        id: get-security-group-id
+        shell: bash
+        run: |
+          VALUE=`aws ec2 describe-security-groups --filters Name=tag:Name,Values=base-${{ inputs.environment }}-base-ec2-github-runner --query "SecurityGroups[].GroupId" --output text`
+          echo "::set-output name=value::$VALUE"
 
       - name: Start EC2 runner
         id: start-ec2-runner
@@ -51,8 +61,8 @@ jobs:
           github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
           ec2-image-id: ami-0f6c72ce17bd23bb3
           ec2-instance-type: ${{ inputs.ec2-instance-type }}
-          subnet-id: ${{ steps.get-ec2-runner-parameters.outputs.subnet-id }}
-          security-group-id: ${{ steps.get-ec2-runner-parameters.outputs.security-group-id }}
+          subnet-id: ${{ steps.get-subnet-id.outputs.value }}
+          security-group-id: ${{ steps.get-security-group-id.outputs.value }}
           aws-resource-tags: >
             [
               {"Key": "Name", "Value": "ec2-github-runner"},

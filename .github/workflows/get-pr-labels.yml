@@ -12,6 +12,9 @@ on:
       quality-label-present:
         description: "cicd:quality label is present in the PR"
         value: ${{ contains(github.event.pull_request.labels.*.name, 'cicd:quality') }}
+      test-label-present:
+        description: "cicd:test label is present in the PR"
+        value: ${{ contains(github.event.pull_request.labels.*.name, 'cicd:test') }}
       environment-name:
         description: "Environment name extracted from the cicd:deploy:* label"
         value: ${{ jobs.get-pr-labels.outputs.environment-name }}

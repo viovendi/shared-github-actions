@@ -18,6 +18,11 @@ inputs:
     description: CloudFormation parameters divided by whitespace, Infrastructure parameter should not be specified (e.g. ImageTag=123 CustomParameter=value)
     required: false
     default: ''
+  aws-region:
+    description: AWS region
+    type: string
+    required: false
+    default: eu-central-1
 runs:
   using: composite
   steps:
@@ -30,7 +35,7 @@ runs:
       run: |
         aws cloudformation package \
           --template-file ${{ inputs.cf-template-path }} \
-          --s3-bucket doo-infrastructure \
+          --s3-bucket doo-cloud-formation-artifacts-bucket-${{ inputs.aws-region }} \
           --s3-prefix ${{ inputs.microservice-name }} \
           --output-template-file ./infrastructure/compiled.yml
 
@@ -42,7 +47,7 @@ runs:
           aws cloudformation deploy \
             --template-file ./infrastructure/compiled.yml \
             --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }} \
-            --s3-bucket doo-infrastructure \
+            --s3-bucket doo-cloud-formation-artifacts-bucket-${{ inputs.aws-region }} \
             --s3-prefix ${{ inputs.microservice-name }} \
             --parameter-overrides Infrastructure=${{ inputs.environment }} ${{ inputs.cf-parameters }} \
             --capabilities CAPABILITY_IAM

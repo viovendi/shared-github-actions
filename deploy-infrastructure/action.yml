@@ -78,7 +78,7 @@ runs:
 
     # Run only for deployments to production
     - name: Create release tag
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const environment = '${{ inputs.environment }}';

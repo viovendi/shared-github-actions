@@ -45,7 +45,7 @@ jobs:
           aws-region: ${{ inputs.aws-region }}
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Deploy infrastructure
         timeout-minutes: 60

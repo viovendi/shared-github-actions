@@ -16,9 +16,8 @@ runs:
         script: |
           await core.summary
             .addHeading('User input')
-            .addDetails('Inputs provided by the user')
             .addTable([
               [{data: 'Input', header: true}, {data: 'Value', header: true}],
-              ['Branch', 'master']
+              ['imputs string', '${{ inputs.user-inputs }}']
             ])
             .write()

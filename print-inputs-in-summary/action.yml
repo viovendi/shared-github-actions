@@ -11,13 +11,13 @@ runs:
   using: composite
   steps:
     - name: Print summary
-        uses: actions/github-script@v6
-        with:
-          script: |
-            await core.summary
-              .addHeading('User input')
-              .addTable([
-                [{data: 'Input', header: true}, {data: 'Value', header: true}],
-                ['Branch', 'master']
-              ])
-              .write()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          await core.summary
+            .addHeading('User input')
+            .addTable([
+              [{data: 'Input', header: true}, {data: 'Value', header: true}],
+              ['Branch', 'master']
+            ])
+            .write()

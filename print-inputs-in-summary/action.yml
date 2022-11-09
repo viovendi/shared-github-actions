@@ -15,12 +15,14 @@ runs:
       with:
         script: |
           const inputs = ${{ inputs.user-inputs }};
-          console.log(inputs);
+
+          var inputTable = [];
+          inputTable.push([{data: 'Input', header: true}, {data: 'Value', header: true}]);
+          for (const property in inputs) {
+            inputArray.push([property, inputs[property]]);
+          }
 
           await core.summary
             .addHeading('User input')
-            .addTable([
-              [{data: 'Input', header: true}, {data: 'Value', header: true}],
-              ['imputs string', '']
-            ])
+            .addTable(inputTable)
             .write()

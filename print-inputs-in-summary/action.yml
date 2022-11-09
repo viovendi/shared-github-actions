@@ -14,9 +14,9 @@ runs:
       uses: actions/github-script@v6
       with:
         script: |
-          console.log('${{ inputs.user-inputs }}');
-          var inputs = JSON.parse('${{ inputs.user-inputs }}');
-          console.log(inputs);
+          //console.log('${{ inputs.user-inputs }}');
+          //var inputs = JSON.parse('${{ inputs.user-inputs }}');
+          //console.log(inputs);
 
           await core.summary
             .addHeading('User input')

@@ -19,7 +19,7 @@ runs:
           var inputTable = [];
           inputTable.push([{data: 'Input', header: true}, {data: 'Value', header: true}]);
           for (const property in inputs) {
-            inputArray.push([property, inputs[property]]);
+            inputTable.push([property, inputs[property]]);
           }
 
           await core.summary

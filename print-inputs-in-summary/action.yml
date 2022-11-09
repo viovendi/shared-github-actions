@@ -1,0 +1,23 @@
+name: Print inputs in summary
+# docs: https://github.blog/2022-05-09-supercharging-github-actions-with-job-summaries/
+# docs: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary
+
+inputs:
+  user-inputs: 
+    description: User inputs
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Print summary
+        uses: actions/github-script@v6
+        with:
+          script: |
+            await core.summary
+              .addHeading('User input')
+              .addTable([
+                [{data: 'Input', header: true}, {data: 'Value', header: true}],
+                ['Branch', 'master']
+              ])
+              .write()

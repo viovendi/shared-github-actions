@@ -44,14 +44,14 @@ jobs:
         shell: bash
         run: |
           VALUE=`aws ec2 describe-subnets --filters Name=tag:Name,Values=doo-${{ inputs.environment }}-be-private-subnet1 --query "Subnets[].SubnetId" --output text`
-          echo "::set-output name=value::$VALUE"
+          echo "value=$VALUE" >> $GITHUB_OUTPUT
 
       - name: Get security group id
         id: get-security-group-id
         shell: bash
         run: |
           VALUE=`aws ec2 describe-security-groups --filters Name=tag:Name,Values=base-${{ inputs.environment }}-base-ec2-github-runner --query "SecurityGroups[].GroupId" --output text`
-          echo "::set-output name=value::$VALUE"
+          echo "value=$VALUE" >> $GITHUB_OUTPUT
 
       - name: Start EC2 runner
         id: start-ec2-runner

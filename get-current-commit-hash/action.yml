@@ -28,4 +28,4 @@ runs:
     - name: Set commit hash to output
       id: get-commit-hash
       shell: bash
-      run: echo "##[set-output name=commit-hash;]$(echo $COMMIT_HASH)"
+      run: echo "commit-hash=$COMMIT_HASH" >> $GITHUB_OUTPUT

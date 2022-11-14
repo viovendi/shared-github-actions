@@ -16,4 +16,4 @@ runs:
       shell: bash
       run: |
         EXPORT_VALUE=`aws cloudformation list-exports --query "Exports[?Name=='${{ inputs.export-name }}'].Value" --output text`
-        echo "::set-output name=export-value::$EXPORT_VALUE"
+        echo "export-value=$EXPORT_VALUE" >> $GITHUB_OUTPUT

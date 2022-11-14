@@ -37,4 +37,4 @@ runs:
     - name: Set branch name to output
       id: get-branch-name
       shell: bash
-      run: echo "##[set-output name=branch-name;]$(echo $BRANCH_NAME)"
+      run: echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT

@@ -7,7 +7,7 @@ on:
         description: EC2 instance type
         type: string
         required: false
-        default: t3.small
+        default: t4g.small
     outputs:
       label:
         description: "Name of the unique label assigned to the runner"

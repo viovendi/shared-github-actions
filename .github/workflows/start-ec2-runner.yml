@@ -7,7 +7,7 @@ on:
         description: EC2 instance type
         type: string
         required: false
-        default: t4g.small
+        default: t3.small
     outputs:
       label:
         description: "Name of the unique label assigned to the runner"
@@ -37,7 +37,7 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
-          ec2-image-id: ami-0606461c799beb490
+          ec2-image-id: ami-0d0eea5ad01da4e3c
           ec2-instance-type: ${{ inputs.ec2-instance-type }}
           subnet-id: subnet-fcf9ffb6
           security-group-id: sg-0c0e690e3d54b7bca

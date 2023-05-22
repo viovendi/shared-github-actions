@@ -41,7 +41,7 @@ jobs:
           SONAR_HOST_URL: ${{ inputs.sonar-host-url }}
         with:
           args: >
-            -Dsonar.projectKey=${{ inputs.project-key }}-${{ steps.get-current-branch-name.outputs.branch-name }}
+            -Dsonar.projectKey=${{ inputs.project-key }}
 
   stop-runner:
     needs:

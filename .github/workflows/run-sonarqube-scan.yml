@@ -1,0 +1,55 @@
+name: (manual) Run SonarQube scan
+
+on:
+  workflow_call:
+    inputs:
+      sonar-host-url:
+        description: Sonar host URL
+        type: string
+        required: true
+      project-key:
+        description: Project key
+        type: string
+        required: true
+
+jobs:
+  # We run SonarQube scan on the EC2 runner in our AWS account 
+  # to allow the action to access our SonarQube service on another EC2 instance
+  start-runner:
+    uses: viovendi/shared-github-actions/.github/workflows/start-ec2-runner.yml@master
+    secrets: inherit
+
+  run-sonarqube-scan:
+    name: Run SonarQube scan
+    needs: start-runner
+    runs-on: ${{ needs.start-runner.outputs.label }}
+    steps:
+      - name: Get current branch name
+        id: get-current-branch-name
+        uses: viovendi/shared-github-actions/get-current-branch-name@master
+  
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.get-current-branch-name.outputs.branch-name }}
+          fetch-depth: 0
+        
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: ${{ inputs.sonar-host-url }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ inputs.project-key }}-${{ steps.get-current-branch-name.outputs.branch-name }}
+
+  stop-runner:
+    needs:
+      - start-runner
+      - run-sonarqube-scan
+    if: always()
+    uses: viovendi/shared-github-actions/.github/workflows/stop-ec2-runner.yml@master
+    with:
+      label: ${{ needs.start-runner.outputs.label }}
+      ec2-instance-id: ${{ needs.start-runner.outputs.ec2-instance-id }}
+    secrets: inherit

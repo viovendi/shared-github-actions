@@ -50,7 +50,7 @@ runs:
             --s3-bucket doo-cloud-formation-artifacts-bucket-${{ inputs.aws-region }} \
             --s3-prefix ${{ inputs.microservice-name }} \
             --parameter-overrides Infrastructure=${{ inputs.environment }} ${{ inputs.cf-parameters }} \
-            --capabilities CAPABILITY_IAM
+            --capabilities CAPABILITY_NAMED_IAM
           exit 0
         elif [[ "${{ inputs.environment }}" =~ ^production[1-3]$ ]]; 
         then

@@ -49,7 +49,7 @@ jobs:
 
       - name: Deploy infrastructure
         timeout-minutes: 60
-        uses: viovendi/shared-github-actions/deploy-infrastructure@DPO-1565
+        uses: viovendi/shared-github-actions/deploy-infrastructure@master
         with:
           microservice-name: ${{ inputs.microservice-name }}
           environment: ${{ inputs.environment }}

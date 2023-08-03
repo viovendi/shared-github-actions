@@ -47,8 +47,6 @@ jobs:
           then
             echo "Production infrastructure can not be removed. To allow production infrastructure removal, change the condition temporarily."
             echo "Temporarily allowed for RDS reencryption."
-            aws cloudformation delete-stack --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}
-            aws cloudformation wait stack-delete-complete --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}
             exit 0
           else
             echo "Unrecognizable environment name"

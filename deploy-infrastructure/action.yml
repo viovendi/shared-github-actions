@@ -9,15 +9,15 @@ inputs:
   cf-stack-name-suffix:
     description: CloudFormation stack name suffix with trailing '-' (e.g. -database)
     required: false
-    default: ''
+    default: ""
   cf-template-path:
     description: CloudFormation template path in the repository (e.g. ./infrastructure/infrastructure.yml)
     required: false
-    default: './infrastructure/infrastructure.yml'
+    default: "./infrastructure/infrastructure.yml"
   cf-parameters:
     description: CloudFormation parameters divided by whitespace, Infrastructure parameter should not be specified (e.g. ImageTag=123 CustomParameter=value)
     required: false
-    default: ''
+    default: ""
   aws-region:
     description: AWS region
     type: string
@@ -39,27 +39,22 @@ runs:
           --s3-prefix ${{ inputs.microservice-name }} \
           --output-template-file ./infrastructure/compiled.yml
 
+    - name: Production safeguard
+      uses: viovendi/shared-github-actions/production-safeguard@master
+      with:
+        environment: ${{ inputs.environment }}
+
     - name: Deploy infrastructure
       shell: bash
       run: |
-        if [[ "${{ inputs.environment }}" =~ ^staging[1-8]$ ]] || ([[ "${{ inputs.environment }}" =~ ^production[1-3]$ ]] && ([[ "${{ steps.get-current-branch-name.outputs.branch-name }}" = "master" ]] || [[ "${{ steps.get-current-branch-name.outputs.branch-name }}" =~ ^release_.+$ ]])); 
-        then
-          aws cloudformation deploy \
-            --template-file ./infrastructure/compiled.yml \
-            --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }} \
-            --s3-bucket doo-cloud-formation-artifacts-bucket-${{ inputs.aws-region }} \
-            --s3-prefix ${{ inputs.microservice-name }} \
-            --parameter-overrides Infrastructure=${{ inputs.environment }} ${{ inputs.cf-parameters }} \
-            --capabilities CAPABILITY_NAMED_IAM
-          exit 0
-        elif [[ "${{ inputs.environment }}" =~ ^production[1-3]$ ]]; 
-        then
-          echo "Production infrastructure can be deployed only from the following branches: master, release_*"
-          exit 1
-        else
-          echo "Unrecognizable environment name"
-          exit 1
-        fi
+        aws cloudformation deploy \
+          --template-file ./infrastructure/compiled.yml \
+          --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }} \
+          --s3-bucket doo-cloud-formation-artifacts-bucket-${{ inputs.aws-region }} \
+          --s3-prefix ${{ inputs.microservice-name }} \
+          --parameter-overrides Infrastructure=${{ inputs.environment }} ${{ inputs.cf-parameters }} \
+          --capabilities CAPABILITY_NAMED_IAM
+        exit 0
 
     - name: Get current commit hash
       id: get-current-commit-hash

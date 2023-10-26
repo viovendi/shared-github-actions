@@ -45,10 +45,8 @@ jobs:
             exit 0
           elif [[ "${{ inputs.environment }}" =~ ^production[1-3]$ ]]; 
           then
-            echo "Temporarily allowed for ADS redeployment."
-            aws cloudformation delete-stack --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}
-            aws cloudformation wait stack-delete-complete --stack-name ${{ format('{0}-{1}{2}', inputs.microservice-name, inputs.environment, inputs.cf-stack-name-suffix) }}
-            exit 0              
+            echo "Production infrastructure can not be removed. To allow production infrastructure removal, change the condition temporarily."
+            exit 1               
           else
             echo "Unrecognizable environment name"
             exit 1

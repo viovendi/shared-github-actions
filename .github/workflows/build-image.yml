@@ -47,6 +47,7 @@ jobs:
           docker build \
             -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-commit-hash.outputs.commit-hash }} \
             -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-branch-name.outputs.branch-name }} \
+            --pull \
             --cache-from ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-branch-name.outputs.branch-name }} \
             ${{ inputs.docker-path }}
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ steps.get-current-commit-hash.outputs.commit-hash }}

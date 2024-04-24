@@ -29,7 +29,7 @@ jobs:
         uses: viovendi/shared-github-actions/get-current-branch-name@master
   
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           ref: ${{ steps.get-current-branch-name.outputs.branch-name }}
           fetch-depth: 0

@@ -11,6 +11,11 @@ on:
         description: Project key
         type: string
         required: true
+      setup-nodejs:
+        description: Whether to setup NodeJS (needed for JS/TS projects)
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   # We run SonarQube scan on the EC2 runner in our AWS account 
@@ -33,6 +38,13 @@ jobs:
         with:
           ref: ${{ steps.get-current-branch-name.outputs.branch-name }}
           fetch-depth: 0
+
+      - name: Setup NodeJS
+        id: setup-nodejs
+        if: ${{ inputs.setup-nodejs }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
         
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master

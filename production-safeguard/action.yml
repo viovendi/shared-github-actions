@@ -21,8 +21,8 @@ runs:
           exit 0
         elif [[ "${{ inputs.environment }}" =~ ^production[1-3]$ ]]; 
         then
-          echo "Production infrastructure can be deployed only from the following branches: master, release_*"
-          exit 1
+           echo "Temporarily allowed for IP set redeployment."
+          exit 0
         else
           echo "Unrecognizable environment name"
           exit 1

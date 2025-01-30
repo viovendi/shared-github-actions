@@ -16,6 +16,10 @@ on:
         type: boolean
         required: false
         default: false
+      branch-name:
+        description: Branch name
+        type: string
+        required: false
 
 jobs:
   # We run SonarQube scan on the EC2 runner in our AWS account 
@@ -36,7 +40,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ steps.get-current-branch-name.outputs.branch-name }}
+          ref: ${{ inputs.branch-name || steps.get-current-branch-name.outputs.branch-name }}
           fetch-depth: 0
 
       - name: Setup NodeJS
@@ -53,7 +57,7 @@ jobs:
           SONAR_HOST_URL: ${{ inputs.sonar-host-url }}
         with:
           args: >
-            -Dsonar.projectKey=${{ inputs.project-key }}-${{ steps.get-current-branch-name.outputs.branch-name }}
+            -Dsonar.projectKey=${{ inputs.project-key }}-${{ inputs.branch-name || steps.get-current-branch-name.outputs.branch-name }}
 
   stop-runner:
     needs:

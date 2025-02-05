@@ -20,6 +20,10 @@ on:
         description: Branch name
         type: string
         required: false
+      ec2-instance-type:
+        description: EC2 instance type
+        type: string
+        required: false
 
 jobs:
   # We run SonarQube scan on the EC2 runner in our AWS account 
@@ -27,6 +31,8 @@ jobs:
   start-runner:
     uses: viovendi/shared-github-actions/.github/workflows/start-ec2-runner.yml@master
     secrets: inherit
+    with:
+      ec2-instance-type: ${{ inputs.ec2-instance-type }}
 
   run-sonarqube-scan:
     name: Run SonarQube scan

@@ -24,6 +24,7 @@ on:
         description: EC2 instance type
         type: string
         required: false
+        default: t3.small
 
 jobs:
   # We run SonarQube scan on the EC2 runner in our AWS account 

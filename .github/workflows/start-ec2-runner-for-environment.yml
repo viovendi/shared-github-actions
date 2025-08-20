@@ -43,7 +43,7 @@ jobs:
         id: get-subnet-id
         shell: bash
         run: |
-          VALUE=`aws ec2 describe-subnets --filters Name=tag:Name,Values=doo-${{ inputs.environment }}-be-private-subnet1 --query "Subnets[].SubnetId" --output text`
+          VALUE=`aws ec2 describe-subnets --filters Name=tag:Name,Values=doo-${{ inputs.environment }}-be-private-subnet2 --query "Subnets[].SubnetId" --output text`
           echo "value=$VALUE" >> $GITHUB_OUTPUT
 
       - name: Get security group id

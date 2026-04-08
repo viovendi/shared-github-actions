@@ -61,7 +61,7 @@ runs:
       uses: viovendi/shared-github-actions/get-current-commit-hash@master
 
     - name: Log deployment
-      uses: fjogeleit/http-request-action@v1
+      uses: fjogeleit/http-request-action@v2
       with:
         url: https://hook.doo.integromat.celonis.com/jpia8vor9dg5himhbkwgcx0s77xdvsd1
         method: POST
@@ -78,7 +78,7 @@ runs:
 
     # Run only for deployments to production
     - name: Create release tag
-      uses: actions/github-script@v6
+      uses: actions/github-script@v8
       with:
         script: |
           const environment = '${{ inputs.environment }}';

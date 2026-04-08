@@ -30,7 +30,7 @@ jobs:
   # We run SonarQube scan on the EC2 runner in our AWS account 
   # to allow the action to access our SonarQube service on another EC2 instance
   start-runner:
-    uses: viovendi/shared-github-actions/.github/workflows/start-ec2-runner.yml@master
+    uses: viovendi/shared-github-actions/.github/workflows/start-ec2-runner.yml@DPO-4977-Update-configure-aws-credentials
     secrets: inherit
     with:
       ec2-instance-type: ${{ inputs.ec2-instance-type }}
@@ -71,7 +71,7 @@ jobs:
       - start-runner
       - run-sonarqube-scan
     if: always()
-    uses: viovendi/shared-github-actions/.github/workflows/stop-ec2-runner.yml@master
+    uses: viovendi/shared-github-actions/.github/workflows/stop-ec2-runner.yml@DPO-4977-Update-configure-aws-credentials
     with:
       label: ${{ needs.start-runner.outputs.label }}
       ec2-instance-id: ${{ needs.start-runner.outputs.ec2-instance-id }}

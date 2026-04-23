@@ -31,4 +31,3 @@ jobs:
           github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
           label: ${{ inputs.label }}
           ec2-instance-id: ${{ inputs.ec2-instance-id }}
-          

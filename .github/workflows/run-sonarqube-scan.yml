@@ -59,7 +59,7 @@ jobs:
 
       - name: Install dirmngr
         run: |
-          sudo dnf install -y gnupg2
+          sudo dnf install -y --allowerasing gnupg2
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master

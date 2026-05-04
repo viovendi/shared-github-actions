@@ -58,7 +58,9 @@ jobs:
           node-version: 24.x
 
       - name: Install dirmngr
-        run: sudo apt-get install -y dirmngr
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dirmngr
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master

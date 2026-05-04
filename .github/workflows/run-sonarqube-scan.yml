@@ -27,7 +27,7 @@ on:
         default: t3.small
 
 jobs:
-  # We run SonarQube scan on the EC2 runner in our AWS account 
+  # We run SonarQube scan on the EC2 runner in our AWS account
   # to allow the action to access our SonarQube service on another EC2 instance
   start-runner:
     uses: viovendi/shared-github-actions/.github/workflows/start-ec2-runner.yml@master
@@ -43,7 +43,7 @@ jobs:
       - name: Get current branch name
         id: get-current-branch-name
         uses: viovendi/shared-github-actions/get-current-branch-name@master
-  
+
       - name: Checkout
         uses: actions/checkout@v6
         with:
@@ -56,7 +56,12 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24.x
-        
+
+      - name: Install dirmngr
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dirmngr
+
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:

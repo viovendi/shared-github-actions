@@ -1,0 +1,213 @@
+name: Generate image SBOM
+
+on:
+  workflow_call:
+    inputs:
+      ecr-repository:
+        description: ECR repository
+        type: string
+        required: true
+      image-tag:
+        description: ECR image tag. Defaults to the current commit hash when omitted.
+        type: string
+        required: false
+        default: ''
+      aws-region:
+        description: AWS region
+        type: string
+        required: false
+        default: eu-central-1
+    outputs:
+      image-uri:
+        description: Fully resolved ECR image URI scanned by Syft
+        value: ${{ jobs.resolve-image.outputs.image-uri }}
+      image-tag:
+        description: Resolved ECR image tag scanned by Syft
+        value: ${{ jobs.resolve-image.outputs.image-tag }}
+      spdx-json-artifact-name:
+        description: Artifact name for the SPDX-JSON SBOM
+        value: ${{ jobs.resolve-image.outputs.spdx-json-artifact-name }}
+      cyclonedx-json-artifact-name:
+        description: Artifact name for the CycloneDX-JSON SBOM
+        value: ${{ jobs.resolve-image.outputs.cyclonedx-json-artifact-name }}
+
+permissions:
+  contents: read
+
+jobs:
+  resolve-image:
+    name: Resolve image
+    runs-on: ubuntu-latest
+    outputs:
+      image-uri: ${{ steps.resolve-image.outputs.image-uri }}
+      image-tag: ${{ steps.resolve-image.outputs.image-tag }}
+      spdx-json-output-file: ${{ steps.sbom-artifacts.outputs.spdx-json-output-file }}
+      spdx-json-artifact-name: ${{ steps.sbom-artifacts.outputs.spdx-json-artifact-name }}
+      cyclonedx-json-output-file: ${{ steps.sbom-artifacts.outputs.cyclonedx-json-output-file }}
+      cyclonedx-json-artifact-name: ${{ steps.sbom-artifacts.outputs.cyclonedx-json-artifact-name }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Get current commit hash
+        if: ${{ inputs.image-tag == '' }}
+        id: get-current-commit-hash
+        uses: viovendi/shared-github-actions/get-current-commit-hash@master
+
+      - name: Resolve image metadata
+        id: resolve-image
+        shell: bash
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ecr-repository }}
+          INPUT_IMAGE_TAG: ${{ inputs.image-tag }}
+          CURRENT_COMMIT_HASH: ${{ steps.get-current-commit-hash.outputs.commit-hash }}
+        run: |
+          set -euo pipefail
+
+          if [[ -n "$INPUT_IMAGE_TAG" ]]; then
+            image_tag="$INPUT_IMAGE_TAG"
+          else
+            image_tag="$CURRENT_COMMIT_HASH"
+          fi
+
+          if [[ -z "$image_tag" ]]; then
+            echo "Unable to resolve an image tag. Provide inputs.image-tag or run from a context with a commit hash."
+            exit 1
+          fi
+
+          image_uri="${ECR_REGISTRY}/${ECR_REPOSITORY}:${image_tag}"
+
+          echo "image-tag=${image_tag}" >> "$GITHUB_OUTPUT"
+          echo "image-uri=${image_uri}" >> "$GITHUB_OUTPUT"
+
+      - name: Check if the image exists
+        shell: bash
+        env:
+          ECR_REPOSITORY: ${{ inputs.ecr-repository }}
+          IMAGE_TAG: ${{ steps.resolve-image.outputs.image-tag }}
+        run: |
+          set -euo pipefail
+
+          aws ecr describe-images \
+            --repository-name "$ECR_REPOSITORY" \
+            --image-ids "imageTag=$IMAGE_TAG"
+
+      - name: Prepare SBOM artifact metadata
+        id: sbom-artifacts
+        shell: bash
+        env:
+          ECR_REPOSITORY: ${{ inputs.ecr-repository }}
+          IMAGE_TAG: ${{ steps.resolve-image.outputs.image-tag }}
+        run: |
+          set -euo pipefail
+
+          safe_repository=$(printf '%s' "$ECR_REPOSITORY" | sed -E 's/[^A-Za-z0-9._-]+/-/g; s/-+/-/g; s/^-//; s/-$//')
+          safe_image_tag=$(printf '%s' "$IMAGE_TAG" | sed -E 's/[^A-Za-z0-9._-]+/-/g; s/-+/-/g; s/^-//; s/-$//')
+
+          if [[ -z "$safe_repository" ]]; then
+            safe_repository="image"
+          fi
+
+          if [[ -z "$safe_image_tag" ]]; then
+            safe_image_tag="tag"
+          fi
+
+          prefix="sbom-${safe_repository}-${safe_image_tag}"
+
+          echo "spdx-json-output-file=${prefix}.spdx.json" >> "$GITHUB_OUTPUT"
+          echo "spdx-json-artifact-name=${prefix}-spdx-json" >> "$GITHUB_OUTPUT"
+          echo "cyclonedx-json-output-file=${prefix}.cyclonedx.json" >> "$GITHUB_OUTPUT"
+          echo "cyclonedx-json-artifact-name=${prefix}-cyclonedx-json" >> "$GITHUB_OUTPUT"
+
+  generate-spdx-json-sbom:
+    name: Generate SPDX-JSON SBOM
+    runs-on: ubuntu-latest
+    needs: resolve-image
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Generate SPDX-JSON SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ needs.resolve-image.outputs.image-uri }}
+          format: spdx-json
+          output-file: ${{ needs.resolve-image.outputs.spdx-json-output-file }}
+          upload-artifact: false
+          dependency-snapshot: false
+          upload-release-assets: false
+
+      - name: Beautify SPDX-JSON SBOM
+        shell: bash
+        env:
+          SBOM_FILE: ${{ needs.resolve-image.outputs.spdx-json-output-file }}
+        run: |
+          set -euo pipefail
+
+          jq . "$SBOM_FILE" > "${SBOM_FILE}.tmp"
+          mv "${SBOM_FILE}.tmp" "$SBOM_FILE"
+
+      - name: Upload SPDX-JSON SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.resolve-image.outputs.spdx-json-artifact-name }}
+          path: ${{ needs.resolve-image.outputs.spdx-json-output-file }}
+          retention-days: 0
+
+  generate-cyclonedx-json-sbom:
+    name: Generate CycloneDX-JSON SBOM
+    runs-on: ubuntu-latest
+    needs: resolve-image
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Generate CycloneDX-JSON SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ needs.resolve-image.outputs.image-uri }}
+          format: cyclonedx-json
+          output-file: ${{ needs.resolve-image.outputs.cyclonedx-json-output-file }}
+          upload-artifact: false
+          dependency-snapshot: false
+          upload-release-assets: false
+
+      - name: Beautify CycloneDX-JSON SBOM
+        shell: bash
+        env:
+          SBOM_FILE: ${{ needs.resolve-image.outputs.cyclonedx-json-output-file }}
+        run: |
+          set -euo pipefail
+
+          jq . "$SBOM_FILE" > "${SBOM_FILE}.tmp"
+          mv "${SBOM_FILE}.tmp" "$SBOM_FILE"
+
+      - name: Upload CycloneDX-JSON SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.resolve-image.outputs.cyclonedx-json-artifact-name }}
+          path: ${{ needs.resolve-image.outputs.cyclonedx-json-output-file }}
+          retention-days: 0

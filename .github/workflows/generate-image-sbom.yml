@@ -149,11 +149,26 @@ jobs:
           image: ${{ needs.resolve-image.outputs.image-uri }}
           format: spdx-json
           output-file: ${{ needs.resolve-image.outputs.spdx-json-output-file }}
-          artifact-name: ${{ needs.resolve-image.outputs.spdx-json-artifact-name }}
-          upload-artifact: true
-          upload-artifact-retention: 0
+          upload-artifact: false
           dependency-snapshot: false
           upload-release-assets: false
+
+      - name: Beautify SPDX-JSON SBOM
+        shell: bash
+        env:
+          SBOM_FILE: ${{ needs.resolve-image.outputs.spdx-json-output-file }}
+        run: |
+          set -euo pipefail
+
+          jq . "$SBOM_FILE" > "${SBOM_FILE}.tmp"
+          mv "${SBOM_FILE}.tmp" "$SBOM_FILE"
+
+      - name: Upload SPDX-JSON SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.resolve-image.outputs.spdx-json-artifact-name }}
+          path: ${{ needs.resolve-image.outputs.spdx-json-output-file }}
+          retention-days: 0
 
   generate-cyclonedx-json-sbom:
     name: Generate CycloneDX-JSON SBOM
@@ -176,8 +191,23 @@ jobs:
           image: ${{ needs.resolve-image.outputs.image-uri }}
           format: cyclonedx-json
           output-file: ${{ needs.resolve-image.outputs.cyclonedx-json-output-file }}
-          artifact-name: ${{ needs.resolve-image.outputs.cyclonedx-json-artifact-name }}
-          upload-artifact: true
-          upload-artifact-retention: 0
+          upload-artifact: false
           dependency-snapshot: false
           upload-release-assets: false
+
+      - name: Beautify CycloneDX-JSON SBOM
+        shell: bash
+        env:
+          SBOM_FILE: ${{ needs.resolve-image.outputs.cyclonedx-json-output-file }}
+        run: |
+          set -euo pipefail
+
+          jq . "$SBOM_FILE" > "${SBOM_FILE}.tmp"
+          mv "${SBOM_FILE}.tmp" "$SBOM_FILE"
+
+      - name: Upload CycloneDX-JSON SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.resolve-image.outputs.cyclonedx-json-artifact-name }}
+          path: ${{ needs.resolve-image.outputs.cyclonedx-json-output-file }}
+          retention-days: 0

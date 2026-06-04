@@ -164,7 +164,7 @@ jobs:
           mv "${SBOM_FILE}.tmp" "$SBOM_FILE"
 
       - name: Upload SPDX-JSON SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ needs.resolve-image.outputs.spdx-json-artifact-name }}
           path: ${{ needs.resolve-image.outputs.spdx-json-output-file }}
@@ -206,7 +206,7 @@ jobs:
           mv "${SBOM_FILE}.tmp" "$SBOM_FILE"
 
       - name: Upload CycloneDX-JSON SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ needs.resolve-image.outputs.cyclonedx-json-artifact-name }}
           path: ${{ needs.resolve-image.outputs.cyclonedx-json-output-file }}

@@ -149,6 +149,8 @@ jobs:
           cat > syft-config.yaml <<'YAML'
           select-catalogers:
             - "-file"
+          relationships:
+            package-file-ownership: false
           YAML
 
       - name: Generate SPDX-JSON SBOM
@@ -200,6 +202,8 @@ jobs:
           cat > syft-config.yaml <<'YAML'
           select-catalogers:
             - "-file"
+          relationships:
+            package-file-ownership: false
           YAML
 
       - name: Generate CycloneDX-JSON SBOM

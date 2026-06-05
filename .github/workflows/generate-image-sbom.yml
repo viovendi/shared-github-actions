@@ -149,6 +149,7 @@ jobs:
           cat > syft-config.yaml <<'YAML'
           select-catalogers:
             - "-file"
+            - "-os"
           relationships:
             package-file-ownership: false
           YAML
@@ -202,6 +203,7 @@ jobs:
           cat > syft-config.yaml <<'YAML'
           select-catalogers:
             - "-file"
+            - "-os"
           relationships:
             package-file-ownership: false
           YAML

@@ -143,12 +143,21 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Create Syft config
+        shell: bash
+        run: |
+          cat > syft-config.yaml <<'YAML'
+          select-catalogers:
+            - "-file"
+          YAML
+
       - name: Generate SPDX-JSON SBOM
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@v0.24.0
         with:
           image: ${{ needs.resolve-image.outputs.image-uri }}
           format: spdx-json
           output-file: ${{ needs.resolve-image.outputs.spdx-json-output-file }}
+          config: syft-config.yaml
           upload-artifact: false
           dependency-snapshot: false
           upload-release-assets: false
@@ -185,12 +194,21 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Create Syft config
+        shell: bash
+        run: |
+          cat > syft-config.yaml <<'YAML'
+          select-catalogers:
+            - "-file"
+          YAML
+
       - name: Generate CycloneDX-JSON SBOM
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@v0.24.0
         with:
           image: ${{ needs.resolve-image.outputs.image-uri }}
           format: cyclonedx-json
           output-file: ${{ needs.resolve-image.outputs.cyclonedx-json-output-file }}
+          config: syft-config.yaml
           upload-artifact: false
           dependency-snapshot: false
           upload-release-assets: false

@@ -21,7 +21,7 @@ runs:
       run: |
         if [[ "${{ github.event_name }}" != "pull_request" ]]; 
         then
-          echo "COMMIT_HASH=${{ github.sha }}" >> $GITHUB_ENV
+          echo "COMMIT_HASH=${{ job.workflow_sha }}" >> $GITHUB_ENV
         fi
         exit 0
 

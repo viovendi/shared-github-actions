@@ -60,6 +60,13 @@ runs:
       id: get-current-commit-hash
       uses: viovendi/shared-github-actions/get-current-commit-hash@master
 
+    - name: Check if the image exists
+      shell: bash
+      run: |
+        aws ecr describe-images \
+          --repository-name ${{ inputs.ecr-repository }} \
+          --image-ids imageTag=${{ steps.get-current-branch-name.outputs.branch-name }}
+
     - name: Log deployment
       uses: fjogeleit/http-request-action@v2
       with:

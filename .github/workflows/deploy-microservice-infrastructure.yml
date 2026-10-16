@@ -20,6 +20,10 @@ on:
         description: ECR repository
         type: string
         required: true
+      repository:
+        description: GitHub repository
+        type: string
+        required: true
 
 jobs:
   deploy-microservice-infrastructure:
@@ -35,17 +39,13 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          repository: ${{ inputs.repository }}
+          ref: master
 
       - name: Get current commit hash
         id: get-current-commit-hash
-        uses: viovendi/shared-github-actions/get-current-commit-hash@master
-
-      - name: Check if the image exists
-        shell: bash
-        run: |
-          aws ecr describe-images \
-            --repository-name ${{ inputs.ecr-repository }} \
-            --image-ids imageTag=${{ steps.get-current-commit-hash.outputs.commit-hash }}
+        uses: viovendi/shared-github-actions/get-current-commit-hash@DPO-5815-Redeploy-from-master
 
       - name: Deploy infrastructure
         timeout-minutes: 15

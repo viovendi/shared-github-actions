@@ -20,6 +20,10 @@ on:
         description: ECR repository
         type: string
         required: true
+      repository:
+        description: GitHub repository
+        type: string
+        required: true
 
 jobs:
   deploy-microservice-infrastructure:
@@ -35,6 +39,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          repository: ${{ inputs.repository }}
 
       - name: Get current commit hash
         id: get-current-commit-hash

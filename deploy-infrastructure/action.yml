@@ -28,7 +28,14 @@ runs:
   steps:
     - name: Get current branch name
       id: get-current-branch-name
-      uses: viovendi/shared-github-actions/get-current-branch-name@master
+      uses: viovendi/shared-github-actions/get-current-branch-name@master    
+      
+    - name: Check if the image exists
+      shell: bash
+      run: |
+        aws ecr describe-images \
+          --repository-name ${{ inputs.ecr-repository }} \
+          --image-ids imageTag=${{ steps.get-current-branch-name.outputs.branch-name }}
 
     - name: Package infrastructure
       shell: bash
@@ -59,13 +66,6 @@ runs:
     - name: Get current commit hash
       id: get-current-commit-hash
       uses: viovendi/shared-github-actions/get-current-commit-hash@master
-
-    - name: Check if the image exists
-      shell: bash
-      run: |
-        aws ecr describe-images \
-          --repository-name ${{ inputs.ecr-repository }} \
-          --image-ids imageTag=${{ steps.get-current-branch-name.outputs.branch-name }}
 
     - name: Log deployment
       uses: fjogeleit/http-request-action@v2

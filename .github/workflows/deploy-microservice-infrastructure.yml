@@ -41,6 +41,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: ${{ inputs.repository }}
+          ref: master
 
       - name: Get current commit hash
         id: get-current-commit-hash
